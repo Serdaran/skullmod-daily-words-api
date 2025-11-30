@@ -1,0 +1,11 @@
+fastapi==0.115.5
+uvicorn[standard]==0.32.0
+python-multipart==0.0.9
+pydantic==2.9.2
+pydantic-settings==2.6.1
+SQLAlchemy==2.0.36
+sqlmodel==0.0.21
+PyJWT==2.9.0
+python-dateutil==2.9.0.post0
+# Swiss Ephemeris (gerçek gezegen ve ev hesapları için)
+pyswisseph==2.10.3.2

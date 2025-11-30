@@ -1,0 +1,17 @@
+# Python sanal ortamı
+.venv/
+__pycache__/
+*.pyc
+
+# SQLite veritabanı
+skullmod.db
+
+# macOS sistem dosyaları
+.DS_Store
+
+# Gizli ayarlar
+.env
+
+# Swiss Ephemeris data (deployment'ta ayrıca eklenir)
+app/data/swisseph/
+

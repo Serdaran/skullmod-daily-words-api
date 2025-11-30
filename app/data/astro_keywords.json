@@ -1,0 +1,15 @@
+{
+  "Koç": ["Cesaret", "Eylem", "Atılım", "Öncülük"],
+  "Boğa": ["Sabır", "Güven", "Konfor", "Süreklilik"],
+  "İkizler": ["İletişim", "Merak", "Zihin", "Esneklik"],
+  "Yengeç": ["Şefkat", "Korumak", "Sezgi", "Yuva"],
+  "Aslan": ["Yaratıcılık", "Özgüven", "Parlamak", "Sahne"],
+  "Başak": ["Düzen", "Hizmet", "Detay", "Verim"],
+  "Terazi": ["Denge", "İlişki", "Estetik", "Uyum"],
+  "Akrep": ["Dönüşüm", "Derinlik", "Güç", "Tutku"],
+  "Yay": ["Macera", "Keşif", "Özgürlük", "Ufuk"],
+  "Oğlak": ["Sorumluluk", "Disiplin", "Hedef", "Zirve"],
+  "Kova": ["Özgünlük", "İnovasyon", "Topluluk", "Vizyon"],
+  "Balık": ["Empati", "İlham", "Rüya", "Akış"]
+}
+

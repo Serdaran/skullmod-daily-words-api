@@ -1,0 +1,14 @@
+{
+  "Macera": ["Keşif", "Cesaret", "Merak", "Özgürlük"],
+  "Sorumluluk": ["Disiplin", "Olgunluk", "Güven", "Düzen"],
+  "İletişim": ["İfade", "Bağlantı", "Ağ"],
+  "Denge": ["Uyum", "Sistem", "Adalet"],
+  "Yaratıcılık": ["İlham", "Akış", "Üretim"],
+  "Güç": ["İrade", "Kararlılık", "Zirve"],
+
+  "Yoğunluk": ["Odak", "Derinlik", "Kararlılık"],
+  "Akış": ["Rahatlık", "Sezgi", "Uyum"],
+  "Mücadele": ["Azim", "Cesaret", "Dayanıklılık"],
+  "Farkındalık": ["Gözlem", "İçgörü", "Netlik"]
+}
+

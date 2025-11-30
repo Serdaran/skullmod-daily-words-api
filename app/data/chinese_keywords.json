@@ -1,0 +1,21 @@
+{
+  "Sıçan": ["Hız", "Zeka", "Uyum"],
+  "Öküz": ["Sebat", "Güven", "Dayanıklılık"],
+  "Kaplan": ["Cesaret", "Liderlik", "Atak"],
+  "Tavşan": ["Zerafet", "Hassasiyet", "Barış"],
+  "Ejderha": ["Güç", "Şans", "İddia"],
+  "Yılan": ["Sezgi", "Strateji", "Sakinlik"],
+  "At": ["Hareket", "Özgürlük", "Coşku"],
+  "Keçi": ["Şefkat", "Sanat", "Yumuşaklık"],
+  "Maymun": ["Zeka", "Oyun", "Çeviklik"],
+  "Horoz": ["Düzen", "Dikkat", "Görünürlük"],
+  "Köpek": ["Sadakat", "Koruma", "Samimiyet"],
+  "Domuz": ["Bolluk", "Neşe", "Cömertlik"],
+
+  "Ağaç": ["Büyüme", "Esneklik", "Canlanma"],
+  "Ateş": ["Tutku", "Enerji", "Dönüşüm"],
+  "Toprak": ["Stabilite", "Pratiklik", "Köklülük"],
+  "Metal": ["Keskinlik", "Düzen", "Netlik"],
+  "Su": ["Akış", "Sezgi", "Derinlik"]
+}
+
