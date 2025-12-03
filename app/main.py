@@ -1,7 +1,7 @@
 from datetime import date
 import json
 import uuid
-import random  # 🔥 astro tabanlı günlük enerji için
+import random
 
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,7 +22,7 @@ app = FastAPI(
     description="SkullMod – Günlük 2 Kelime üretim servisi"
 )
 
-# CORS (ileride mobil / web istemciler için rahatlık)
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -99,13 +99,12 @@ ELEMENT_LABEL_TR = {
 
 def get_zodiac_element_from_birth(birth_dt) -> str:
     """
-    Kullanıcının doğum tarihinden (datetime veya date) zodyak elementini çıkarır.
+    Kullanıcının doğum tarihinden zodyak elementini çıkarır.
     Element: fire / earth / air / water
     """
     if birth_dt is None:
-        return "earth"  # default, nötr
+        return "earth"  # nötr
 
-    # datetime ise .date() ile sadeleştir
     if hasattr(birth_dt, "date"):
         birth_dt = birth_dt.date()
 
@@ -156,18 +155,32 @@ def pick_personal_daily_energy_word(user: User, today: date) -> tuple[str, str]:
     """
     Kullanıcı + tarih + astro element'e göre deterministik bir günlük enerji kelimesi seçer.
     DÖNÜŞ: (energy_word, element_key)
+
+    ÖNEMLİ: Seed artık user_id'ye değil, KİŞİSEL BİLGİLERE bağlı:
+    - first_name, last_name
+    - birth_date
+    - birth_place
+    - gün
+    Böylece aynı verilerle tekrar kayıt olunsa bile, aynı gün aynı kelime gelir.
     """
     birth_dt = getattr(user, "birth_date", None)
     element = get_zodiac_element_from_birth(birth_dt)
-
     words = ENERGY_WORDS_BY_ELEMENT.get(element, ENERGY_WORDS_BY_ELEMENT["earth"])
 
-    # user_id + doğum tarihi + gün bilgisi ile seed oluştur
-    user_id_str = getattr(user, "user_id", None) or str(getattr(user, "id", "unknown"))
-    birth_str = birth_dt.date().isoformat() if hasattr(birth_dt, "date") else (
-        birth_dt.isoformat() if birth_dt else "no-birth"
-    )
-    seed_str = f"{user_id_str}-{birth_str}-{today.isoformat()}-{element}"
+    # Kişisel verileri toplayalım
+    first = (getattr(user, "first_name", "") or "").strip().upper()
+    last = (getattr(user, "last_name", "") or "").strip().upper()
+    birth_place = (getattr(user, "birth_place", "") or "").strip().upper()
+
+    if hasattr(birth_dt, "date"):
+        birth_str = birth_dt.date().isoformat()
+    elif birth_dt:
+        birth_str = birth_dt.isoformat()
+    else:
+        birth_str = "NO_BIRTH"
+
+    # Deterministik seed: Kişisel veriler + gün + element
+    seed_str = f"{first}-{last}-{birth_str}-{birth_place}-{today.isoformat()}-{element}"
 
     rnd = random.Random(seed_str)
     index = rnd.randint(0, len(words) - 1)
@@ -181,7 +194,6 @@ def build_motto(word1: str, energy_word: str, element_key: str) -> str:
     """
     element_label = ELEMENT_LABEL_TR.get(element_key, "toprak")
 
-    # Birkaç basit şablondan deterministik seçim
     templates = [
         "Bugün {energy} senin {element} enerjini uyandırırken, {corner} pusulan olmaya devam ediyor.",
         "{energy} enerjisi bugün alanında; {corner} ise attığın her adımın merkezinde.",
@@ -189,7 +201,6 @@ def build_motto(word1: str, energy_word: str, element_key: str) -> str:
         "Bugünün akışı {energy}; sen {corner} ile kendi hikâyeni yeniden yazıyorsun.",
     ]
 
-    # Kelime kombinasyonuna göre aynı şablonu seçmek için seed
     seed_str = f"{word1}-{energy_word}-{element_key}"
     rnd = random.Random(seed_str)
     idx = rnd.randint(0, len(templates) - 1)
@@ -262,7 +273,7 @@ def daily_words(
     Günlük 2 kelime + motto:
     - Köşe taşı kelimesi (kişisel cornerstone_pool'dan)
     - Günlük enerji kelimesi (kişisel + astro element'e göre)
-    - Aynı gün + aynı kullanıcı için sonuç deterministik
+    - Aynı gün + aynı kişisel veriler için deterministik
     """
     user = db.exec(select(User).where(User.user_id == current_user_id)).first()
     if not user:
@@ -277,7 +288,6 @@ def daily_words(
     today = date.today()
 
     # words_engine içindeki mantığı kişisel köşe taşı için kullanmaya devam ediyoruz
-    # (word2 ve eski mottoyu artık kullanmıyoruz)
     cornerstone_word, _, _ = get_or_create_daily_words(db, user, today)
 
     # KİŞİYE ÖZEL GÜNLÜK ENERJİ + MOTTOSU
