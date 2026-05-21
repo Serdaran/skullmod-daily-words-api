@@ -1,15 +1,50 @@
 {
-  "Koç": ["Cesaret", "Eylem", "Atılım", "Öncülük"],
-  "Boğa": ["Sabır", "Güven", "Konfor", "Süreklilik"],
-  "İkizler": ["İletişim", "Merak", "Zihin", "Esneklik"],
-  "Yengeç": ["Şefkat", "Korumak", "Sezgi", "Yuva"],
-  "Aslan": ["Yaratıcılık", "Özgüven", "Parlamak", "Sahne"],
-  "Başak": ["Düzen", "Hizmet", "Detay", "Verim"],
-  "Terazi": ["Denge", "İlişki", "Estetik", "Uyum"],
-  "Akrep": ["Dönüşüm", "Derinlik", "Güç", "Tutku"],
-  "Yay": ["Macera", "Keşif", "Özgürlük", "Ufuk"],
-  "Oğlak": ["Sorumluluk", "Disiplin", "Hedef", "Zirve"],
-  "Kova": ["Özgünlük", "İnovasyon", "Topluluk", "Vizyon"],
-  "Balık": ["Empati", "İlham", "Rüya", "Akış"]
+  "Koç": [
+    "Cesaret", "Eylem", "Atılım", "Öncülük", "Kıvılcım", "Kararlılık",
+    "Başlatma", "İnisiyatif", "Hız", "Açılım", "Diriliş", "Ateş"
+  ],
+  "Boğa": [
+    "Sabır", "Güven", "Konfor", "Süreklilik", "Köklenme", "Değer",
+    "Beden", "İstikrar", "Bereket", "Dayanıklılık", "Ritim", "Sükunet"
+  ],
+  "İkizler": [
+    "İletişim", "Merak", "Zihin", "Esneklik", "Bağlantı", "Soru",
+    "Öğrenme", "Hareket", "Anlatı", "Nefes", "Kıvraklık", "Fikir"
+  ],
+  "Yengeç": [
+    "Şefkat", "Korumak", "Sezgi", "Yuva", "Hafıza", "Besleme",
+    "Duyarlılık", "Aidiyet", "İç Ses", "Kabuk", "Yakınlık", "Su"
+  ],
+  "Aslan": [
+    "Yaratıcılık", "Özgüven", "Parlamak", "Sahne", "Kalp", "Cömertlik",
+    "Görünürlük", "Oyun", "Işık", "Krallık", "Neşe", "Cesur İfade"
+  ],
+  "Başak": [
+    "Düzen", "Hizmet", "Detay", "Verim", "Arınma", "Ustalık",
+    "Analiz", "Sadelik", "Rutin", "İyileştirme", "Özen", "Seçicilik"
+  ],
+  "Terazi": [
+    "Denge", "İlişki", "Estetik", "Uyum", "Zarafet", "Adalet",
+    "Ayna", "Diplomasi", "Ölçü", "İncelik", "Karşılaşma", "Ahengi Bulma"
+  ],
+  "Akrep": [
+    "Dönüşüm", "Derinlik", "Güç", "Tutku", "Sır", "Arınma",
+    "Yenilenme", "Manyetizma", "Kriz Bilgeliği", "Yoğunluk", "İrade", "Gölge"
+  ],
+  "Yay": [
+    "Macera", "Keşif", "Özgürlük", "Ufuk", "İnanç", "Anlam",
+    "Yolculuk", "Genişleme", "Bilgelik", "Coşku", "Uzak Görüş", "Arayış"
+  ],
+  "Oğlak": [
+    "Sorumluluk", "Disiplin", "Hedef", "Zirve", "Yapı", "Sabır",
+    "Olgunluk", "Strateji", "Eşik", "Dayanak", "Plan", "İnşa"
+  ],
+  "Kova": [
+    "Özgünlük", "İnovasyon", "Topluluk", "Vizyon", "Bağımsızlık", "Farklılık",
+    "Gelecek", "Sistem Kırma", "Dostluk", "Uyanış", "Elektrik", "Deney"
+  ],
+  "Balık": [
+    "Empati", "İlham", "Rüya", "Akış", "Teslimiyet", "Şifa",
+    "Hayal", "Merhamet", "Sınır Çözülmesi", "Sezgi", "Sessizlik", "Mistiklik"
+  ]
 }
-

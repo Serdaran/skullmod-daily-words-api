@@ -1,21 +1,20 @@
 {
-  "Sıçan": ["Hız", "Zeka", "Uyum"],
-  "Öküz": ["Sebat", "Güven", "Dayanıklılık"],
-  "Kaplan": ["Cesaret", "Liderlik", "Atak"],
-  "Tavşan": ["Zerafet", "Hassasiyet", "Barış"],
-  "Ejderha": ["Güç", "Şans", "İddia"],
-  "Yılan": ["Sezgi", "Strateji", "Sakinlik"],
-  "At": ["Hareket", "Özgürlük", "Coşku"],
-  "Keçi": ["Şefkat", "Sanat", "Yumuşaklık"],
-  "Maymun": ["Zeka", "Oyun", "Çeviklik"],
-  "Horoz": ["Düzen", "Dikkat", "Görünürlük"],
-  "Köpek": ["Sadakat", "Koruma", "Samimiyet"],
-  "Domuz": ["Bolluk", "Neşe", "Cömertlik"],
+  "Sıçan": ["Hız", "Zeka", "Uyum", "Fırsat", "Çeviklik", "Strateji", "Sezme", "Kıvraklık"],
+  "Öküz": ["Sebat", "Güven", "Dayanıklılık", "Emek", "Sakin Güç", "İstikrar", "Taşıyıcılık", "Sabır"],
+  "Kaplan": ["Cesaret", "Liderlik", "Atak", "Vahşi Güç", "İrade", "Koruma", "Risk", "Sıçrama"],
+  "Tavşan": ["Zerafet", "Hassasiyet", "Barış", "İncelik", "Sezgi", "Yumuşaklık", "Huzur", "Diplomasi"],
+  "Ejderha": ["Güç", "Şans", "İddia", "Manyetizma", "Yükseliş", "Görkem", "Ateşli Vizyon", "Kader"],
+  "Yılan": ["Sezgi", "Strateji", "Sakinlik", "Bilgelik", "Gizem", "Deri Değişimi", "Odak", "Derin Görüş"],
+  "At": ["Hareket", "Özgürlük", "Coşku", "Hız", "Canlılık", "Yol", "Rüzgar", "Atılım"],
+  "Keçi": ["Şefkat", "Sanat", "Yumuşaklık", "Hayal", "İncelik", "Uyum", "Estetik", "Besleme"],
+  "Maymun": ["Zeka", "Oyun", "Çeviklik", "Mizah", "Deney", "Problem Çözme", "Kıvılcım", "Esneklik"],
+  "Horoz": ["Düzen", "Dikkat", "Görünürlük", "Netlik", "Ritim", "Uyanış", "Özen", "İlan"],
+  "Köpek": ["Sadakat", "Koruma", "Samimiyet", "Güven", "Vefa", "Bekçilik", "Dürüstlük", "Kalp Bağı"],
+  "Domuz": ["Bolluk", "Neşe", "Cömertlik", "Rahatlık", "Haz", "Paylaşım", "İyi Niyet", "Bereket"],
 
-  "Ağaç": ["Büyüme", "Esneklik", "Canlanma"],
-  "Ateş": ["Tutku", "Enerji", "Dönüşüm"],
-  "Toprak": ["Stabilite", "Pratiklik", "Köklülük"],
-  "Metal": ["Keskinlik", "Düzen", "Netlik"],
-  "Su": ["Akış", "Sezgi", "Derinlik"]
+  "Ağaç": ["Büyüme", "Esneklik", "Canlanma", "Kök", "Filiz", "Yön Bulma", "Genişleme", "Tazelenme"],
+  "Ateş": ["Tutku", "Enerji", "Dönüşüm", "Parlama", "Kıvılcım", "Isı", "Cesaret", "Canlanma"],
+  "Toprak": ["Stabilite", "Pratiklik", "Köklülük", "Taşıma", "Bereket", "Denge", "Dayanak", "Somutluk"],
+  "Metal": ["Keskinlik", "Düzen", "Netlik", "Sınır", "Karar", "Arıtma", "Disiplin", "Odak"],
+  "Su": ["Akış", "Sezgi", "Derinlik", "Uyumlanma", "Sakinlik", "Rüya", "Arınma", "Hafıza"]
 }
-

@@ -1,10 +1,14 @@
 import jwt
+import hashlib
+import hmac
+import secrets
 from datetime import datetime, timedelta, timezone
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from .config import settings
 
 security = HTTPBearer()
+PASSWORD_HASH_ITERATIONS = 260_000
 
 
 def create_token(user_id: str) -> str:
@@ -38,3 +42,34 @@ def get_current_user_id(
 ) -> str:
     return parse_token(creds.credentials)
 
+
+def hash_password(password: str) -> str:
+    salt = secrets.token_hex(16)
+    digest = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode("utf-8"),
+        salt.encode("utf-8"),
+        PASSWORD_HASH_ITERATIONS,
+    ).hex()
+    return f"pbkdf2_sha256${PASSWORD_HASH_ITERATIONS}${salt}${digest}"
+
+
+def verify_password(password: str, stored_hash: str | None) -> bool:
+    if not stored_hash:
+        return False
+
+    try:
+        algorithm, iterations, salt, expected_digest = stored_hash.split("$", 3)
+    except ValueError:
+        return False
+
+    if algorithm != "pbkdf2_sha256":
+        return False
+
+    digest = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode("utf-8"),
+        salt.encode("utf-8"),
+        int(iterations),
+    ).hex()
+    return hmac.compare_digest(digest, expected_digest)
