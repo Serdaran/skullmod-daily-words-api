@@ -2,9 +2,22 @@ from sqlalchemy import inspect, text
 from sqlmodel import SQLModel, create_engine, Session
 from .config import settings
 
+
+def normalize_database_url(database_url: str) -> str:
+    if database_url.startswith("postgres://"):
+        return database_url.replace("postgres://", "postgresql+psycopg://", 1)
+    if database_url.startswith("postgresql://"):
+        return database_url.replace("postgresql://", "postgresql+psycopg://", 1)
+    return database_url
+
+
+DATABASE_URL = normalize_database_url(settings.DATABASE_URL)
+
+
 engine = create_engine(
-    settings.DATABASE_URL,
-    connect_args={"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {}
+    DATABASE_URL,
+    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {},
+    pool_pre_ping=True,
 )
 
 def init_db():
@@ -14,7 +27,7 @@ def init_db():
 
 
 def ensure_user_account_columns():
-    if "sqlite" not in settings.DATABASE_URL:
+    if "sqlite" not in DATABASE_URL:
         return
 
     inspector = inspect(engine)

@@ -24,6 +24,24 @@ uvicorn app.main:app --reload
 python -m pytest
 ```
 
+## Render PostgreSQL Setup
+
+For production, use Render PostgreSQL instead of SQLite.
+
+1. Create a PostgreSQL database in Render.
+2. Copy the database's internal connection string.
+3. In the `skullmod-daily-words-api` web service, set:
+
+```text
+DATABASE_URL=<Render PostgreSQL internal connection string>
+SECRET_KEY=<random string with at least 32 characters>
+ENV=production
+```
+
+The app accepts both `postgres://...` and `postgresql://...` URLs and normalizes them for SQLAlchemy.
+
+After changing `DATABASE_URL`, trigger a manual deploy in Render. On startup, the API creates the required tables if they do not exist.
+
 ## Physical Skull NFC Artifacts
 
 Create artifact records before writing NFC tags. The generated CSV contains the URL that should be written to each physical NFC tag.
