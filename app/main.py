@@ -15,11 +15,13 @@ from .db import init_db
 from .models import User, PhysicalSkull, NFCScanLog
 from .schemas import (
     AuthResponse,
+    BasicResponse,
     DailyWordsResponse,
     LoginRequest,
     NFCClaimResponse,
     NFCStatusResponse,
     PhysicalSkullSummary,
+    ProfilePasswordResetRequest,
     RegisterRequest,
     RegisterResponse,
 )
@@ -126,6 +128,10 @@ def validate_password(password: Optional[str]) -> None:
             status_code=400,
             detail="Şifre en az 8 karakter olmalıdır.",
         )
+
+
+def normalize_profile_text(value: Optional[str]) -> str:
+    return " ".join((value or "").strip().lower().split())
 
 
 # ----------------------------------------------------
@@ -347,6 +353,40 @@ def login(
         success=True,
         token=create_token(user.user_id),
         user_id=user.user_id,
+    )
+
+
+@app.post("/api/v1/password-reset/profile", response_model=BasicResponse)
+def reset_password_with_profile(
+    payload: ProfilePasswordResetRequest,
+    db: Session = Depends(get_db),
+):
+    validate_password(payload.new_password)
+
+    email = normalize_email(payload.email)
+    user = db.exec(select(User).where(User.email == email)).first()
+
+    profile_matches = False
+    if user:
+        profile_matches = (
+            user.birth_date.date() == payload.birth_date.date()
+            and normalize_profile_text(user.birth_place) == normalize_profile_text(payload.birth_place)
+        )
+
+    if not user or not profile_matches:
+        raise HTTPException(
+            status_code=400,
+            detail="Hesap bilgileri doğrulanamadı.",
+        )
+
+    user.password_hash = hash_password(payload.new_password)
+    user.updated_at = datetime.now(timezone.utc)
+    db.add(user)
+    db.commit()
+
+    return BasicResponse(
+        success=True,
+        message="Şifre güncellendi.",
     )
 
 

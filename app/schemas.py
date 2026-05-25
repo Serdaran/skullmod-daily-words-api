@@ -23,10 +23,22 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class ProfilePasswordResetRequest(BaseModel):
+    email: str
+    birth_date: datetime
+    birth_place: str
+    new_password: str
+
+
 class AuthResponse(BaseModel):
     success: bool
     token: str
     user_id: str
+
+
+class BasicResponse(BaseModel):
+    success: bool
+    message: Optional[str] = None
 
 
 class DailyWordsResponse(BaseModel):

@@ -156,6 +156,83 @@ def test_login_rejects_wrong_password():
     assert response.status_code == 401
 
 
+def test_profile_password_reset_allows_login_with_new_password():
+    client, _ = make_test_client()
+
+    try:
+        client.post(
+            "/api/v1/register",
+            json={
+                "first_name": "DENIZ",
+                "last_name": "KAYA",
+                "birth_date": "1990-08-17T14:30:00",
+                "birth_place": "Izmir, Turkiye",
+                "email": "deniz@example.com",
+                "password": "oldpass123",
+            },
+        )
+        reset_response = client.post(
+            "/api/v1/password-reset/profile",
+            json={
+                "email": "deniz@example.com",
+                "birth_date": "1990-08-17T00:00:00",
+                "birth_place": "  izmir,   turkiye ",
+                "new_password": "newpass123",
+            },
+        )
+        old_login_response = client.post(
+            "/api/v1/login",
+            json={
+                "email": "deniz@example.com",
+                "password": "oldpass123",
+            },
+        )
+        new_login_response = client.post(
+            "/api/v1/login",
+            json={
+                "email": "deniz@example.com",
+                "password": "newpass123",
+            },
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert reset_response.status_code == 200
+    assert reset_response.json()["success"] is True
+    assert old_login_response.status_code == 401
+    assert new_login_response.status_code == 200
+
+
+def test_profile_password_reset_rejects_wrong_birth_place():
+    client, _ = make_test_client()
+
+    try:
+        client.post(
+            "/api/v1/register",
+            json={
+                "first_name": "DENIZ",
+                "last_name": "KAYA",
+                "birth_date": "1990-08-17T14:30:00",
+                "birth_place": "Izmir, Turkiye",
+                "email": "deniz@example.com",
+                "password": "oldpass123",
+            },
+        )
+        reset_response = client.post(
+            "/api/v1/password-reset/profile",
+            json={
+                "email": "deniz@example.com",
+                "birth_date": "1990-08-17T00:00:00",
+                "birth_place": "Ankara, Turkiye",
+                "new_password": "newpass123",
+            },
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert reset_response.status_code == 400
+
+
 def test_daily_words_requires_token():
     client, _ = make_test_client()
 
