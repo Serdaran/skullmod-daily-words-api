@@ -31,6 +31,11 @@ from .auth import (
     verify_password,
 )
 from .deps import get_db
+from .services.localization import (
+    build_localized_motto,
+    localize_word,
+    normalize_language,
+)
 from .services.words_engine import build_cornerstone_pool, get_or_create_daily_words
 
 
@@ -174,14 +179,6 @@ ENERGY_WORDS_BY_ELEMENT = {
     ],
 }
 
-ELEMENT_LABEL_TR = {
-    "fire": "ateş",
-    "earth": "toprak",
-    "air": "hava",
-    "water": "su",
-}
-
-
 def get_zodiac_element_from_birth(birth_dt) -> str:
     """
     Kullanıcının doğum tarihinden zodyak elementini çıkarır.
@@ -273,31 +270,6 @@ def pick_personal_daily_energy_word(user: User, today: date) -> tuple[str, str]:
     return words[index], element
 
 
-def build_motto(word1: str, energy_word: str, element_key: str) -> str:
-    """
-    Köşe taşı + günlük enerji + element bilgisine göre motto üretir.
-    """
-    element_label = ELEMENT_LABEL_TR.get(element_key, "toprak")
-
-    templates = [
-        "Bugün {energy} senin {element} enerjini uyandırırken, {corner} pusulan olmaya devam ediyor.",
-        "{energy} enerjisi bugün alanında; {corner} ise attığın her adımın merkezinde.",
-        "Gökyüzü bugün {element} tınısında: {energy} seni çağırıyor, {corner} rotanı sabitliyor.",
-        "Bugünün akışı {energy}; sen {corner} ile kendi hikâyeni yeniden yazıyorsun.",
-    ]
-
-    seed_str = f"{word1}-{energy_word}-{element_key}"
-    rnd = random.Random(seed_str)
-    idx = rnd.randint(0, len(templates) - 1)
-
-    template = templates[idx]
-    return template.format(
-        energy=energy_word,
-        corner=word1,
-        element=element_label,
-    )
-
-
 # ----------------------------------------------------
 # KAYIT / REGISTER ENDPOINT
 # ----------------------------------------------------
@@ -385,6 +357,7 @@ def login(
 
 @app.get("/api/v1/daily-words", response_model=DailyWordsResponse)
 def daily_words(
+    lang: str = "tr",
     current_user_id: str = Depends(get_current_user_id),
     db: Session = Depends(get_db),
 ):
@@ -409,17 +382,27 @@ def daily_words(
     # words_engine içindeki mantığı kişisel köşe taşı için kullanmaya devam ediyoruz
     cornerstone_word, _, _ = get_or_create_daily_words(db, user, today)
 
+    language = normalize_language(lang)
+
     # KİŞİYE ÖZEL GÜNLÜK ENERJİ + MOTTOSU
     energy_word, element_key = pick_personal_daily_energy_word(user, today)
-    motto = build_motto(cornerstone_word, energy_word, element_key)
+    localized_cornerstone = localize_word(cornerstone_word, language)
+    localized_energy = localize_word(energy_word, language)
+    motto = build_localized_motto(
+        localized_cornerstone,
+        localized_energy,
+        element_key,
+        language,
+    )
 
     return DailyWordsResponse(
         success=True,
         data={
-            "word1": cornerstone_word,
-            "word2": energy_word,
+            "word1": localized_cornerstone,
+            "word2": localized_energy,
             "motto": motto,
-            "date": today.isoformat()
+            "date": today.isoformat(),
+            "language": language,
         }
     )
 

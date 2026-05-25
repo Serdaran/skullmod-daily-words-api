@@ -203,6 +203,37 @@ def test_register_then_daily_words_returns_expected_contract():
     assert body["data"]["motto"]
 
 
+def test_daily_words_supports_english_language():
+    client, _ = make_test_client()
+
+    try:
+        register_response = client.post(
+            "/api/v1/register",
+            json={
+                "first_name": "DENIZ",
+                "last_name": "KAYA",
+                "birth_date": "1990-08-17T14:30:00",
+                "birth_place": "Izmir, Turkiye",
+            },
+        )
+        token = register_response.json()["token"]
+
+        english_response = client.get(
+            "/api/v1/daily-words?lang=en",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    body = english_response.json()
+
+    assert english_response.status_code == 200
+    assert body["success"] is True
+    assert body["data"]["language"] == "en"
+    assert "Bugün" not in body["data"]["motto"]
+    assert "Today" in body["data"]["motto"] or "today" in body["data"]["motto"]
+
+
 def test_daily_energy_is_deterministic_for_same_person_same_day():
     client, _ = make_test_client()
     payload = {
