@@ -1,4 +1,4 @@
-from datetime import datetime, date, timezone
+from datetime import datetime, date as date_type, timezone
 from typing import Optional
 from sqlmodel import SQLModel, Field
 
@@ -32,10 +32,26 @@ class DailyWord(SQLModel, table=True):
     """
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: str = Field(foreign_key="user.user_id")
-    date: date
+    date: date_type
     word1: str
     word2: str
     motto: str
+
+
+class DailyCombination(SQLModel, table=True):
+    """
+    Günlük iki kelime + skull işareti kombinasyonu.
+    İlk sosyal sinyal için kişileri ifşa etmeden toplu eşleşme sayısı üretir.
+    """
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: str = Field(foreign_key="user.user_id", index=True)
+    date: date_type = Field(index=True)
+    word1: str = Field(index=True)
+    word2: str = Field(index=True)
+    skull_id: str = Field(index=True)
+    language: str = Field(default="tr", index=True)
+    created_at: datetime = Field(default_factory=utc_now)
+    updated_at: Optional[datetime] = None
 
 
 class PhysicalSkull(SQLModel, table=True):

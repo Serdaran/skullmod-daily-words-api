@@ -6,7 +6,7 @@ from sqlmodel.pool import StaticPool
 
 from app.deps import get_db
 from app.main import app
-from app.models import DailyWord, NFCScanLog, PhysicalSkull
+from app.models import DailyCombination, DailyWord, NFCScanLog, PhysicalSkull
 
 
 def make_test_client():
@@ -367,6 +367,50 @@ def test_daily_words_cache_creates_one_record_per_user_per_day():
     assert second_response.status_code == 200
     assert first_response.json()["data"] == second_response.json()["data"]
     assert len(records) == 1
+
+
+def test_daily_combination_records_distinct_user_match_count():
+    client, engine = make_test_client()
+
+    try:
+        first_token = register_test_user(client, first_name="DENIZ")
+        second_token = register_test_user(client, first_name="ELIF")
+        payload = {
+            "date": date.today().isoformat(),
+            "word1": "Düşünce",
+            "word2": "İlham",
+            "skull_id": "skull-042",
+            "language": "tr",
+        }
+
+        first_response = client.post(
+            "/api/v1/daily-combination",
+            json=payload,
+            headers={"Authorization": f"Bearer {first_token}"},
+        )
+        duplicate_response = client.post(
+            "/api/v1/daily-combination",
+            json=payload,
+            headers={"Authorization": f"Bearer {first_token}"},
+        )
+        second_response = client.post(
+            "/api/v1/daily-combination",
+            json=payload,
+            headers={"Authorization": f"Bearer {second_token}"},
+        )
+
+        with Session(engine) as session:
+            records = session.exec(select(DailyCombination)).all()
+    finally:
+        app.dependency_overrides.clear()
+
+    assert first_response.status_code == 200
+    assert first_response.json()["match_count"] == 1
+    assert duplicate_response.status_code == 200
+    assert duplicate_response.json()["match_count"] == 1
+    assert second_response.status_code == 200
+    assert second_response.json()["match_count"] == 2
+    assert len(records) == 2
 
 
 def register_test_user(client, first_name="DENIZ"):

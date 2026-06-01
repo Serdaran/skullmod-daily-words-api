@@ -47,6 +47,20 @@ class DailyWordsResponse(BaseModel):
     error: Optional[str] = None
 
 
+class DailyCombinationRequest(BaseModel):
+    date: date
+    word1: str
+    word2: str
+    skull_id: str
+    language: str = "tr"
+
+
+class DailyCombinationResponse(BaseModel):
+    success: bool
+    match_count: int
+    message: Optional[str] = None
+
+
 class NFCStatusResponse(BaseModel):
     valid: bool
     artifact_code: Optional[str] = None

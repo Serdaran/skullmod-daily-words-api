@@ -12,10 +12,12 @@ from sqlmodel import Session, select
 
 from .config import settings
 from .db import init_db
-from .models import User, PhysicalSkull, NFCScanLog
+from .models import User, DailyCombination, PhysicalSkull, NFCScanLog
 from .schemas import (
     AuthResponse,
     BasicResponse,
+    DailyCombinationRequest,
+    DailyCombinationResponse,
     DailyWordsResponse,
     LoginRequest,
     NFCClaimResponse,
@@ -444,6 +446,71 @@ def daily_words(
             "date": today.isoformat(),
             "language": language,
         }
+    )
+
+
+@app.post("/api/v1/daily-combination", response_model=DailyCombinationResponse)
+def record_daily_combination(
+    payload: DailyCombinationRequest,
+    current_user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+):
+    """
+    Kullanıcıları birbirine göstermeden günlük kombinasyon sayısı üretir.
+    Aynı kullanıcı + aynı tarih + aynı dil için tek kayıt tutulur.
+    """
+    language = normalize_language(payload.language)
+    word1 = payload.word1.strip()
+    word2 = payload.word2.strip()
+    skull_id = payload.skull_id.strip().lower()
+
+    if not word1 or not word2 or not skull_id:
+        raise HTTPException(status_code=400, detail="Kombinasyon bilgisi eksik.")
+
+    existing = db.exec(
+        select(DailyCombination).where(
+            DailyCombination.user_id == current_user_id,
+            DailyCombination.date == payload.date,
+            DailyCombination.language == language,
+        )
+    ).first()
+
+    now = datetime.now(timezone.utc)
+    if existing:
+        existing.word1 = word1
+        existing.word2 = word2
+        existing.skull_id = skull_id
+        existing.updated_at = now
+        db.add(existing)
+    else:
+        db.add(
+            DailyCombination(
+                user_id=current_user_id,
+                date=payload.date,
+                word1=word1,
+                word2=word2,
+                skull_id=skull_id,
+                language=language,
+            )
+        )
+
+    db.commit()
+
+    matches = db.exec(
+        select(DailyCombination).where(
+            DailyCombination.date == payload.date,
+            DailyCombination.word1 == word1,
+            DailyCombination.word2 == word2,
+            DailyCombination.skull_id == skull_id,
+            DailyCombination.language == language,
+        )
+    ).all()
+
+    distinct_user_count = len({match.user_id for match in matches})
+
+    return DailyCombinationResponse(
+        success=True,
+        match_count=max(1, distinct_user_count),
     )
 
 
