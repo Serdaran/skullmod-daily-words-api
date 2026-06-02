@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./skullmod.db"
     DEFAULT_TZ: str = "Europe/Istanbul"
     CORS_ORIGINS: str = "*"
-    PUBLIC_NFC_BASE_URL: str = "https://skullmod.app"
+    PUBLIC_NFC_BASE_URL: str = "https://skullmod.tr"
 
     @field_validator("SECRET_KEY")
     @classmethod

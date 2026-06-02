@@ -21,7 +21,13 @@ engine = create_engine(
 )
 
 def init_db():
-    from .models import User, DailyWord, PhysicalSkull, NFCScanLog  # tablo tanımları
+    from .models import (  # tablo tanımları
+        DailyCombination,
+        DailyWord,
+        NFCScanLog,
+        PhysicalSkull,
+        User,
+    )
     SQLModel.metadata.create_all(engine)
     ensure_user_account_columns()
 

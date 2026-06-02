@@ -59,7 +59,7 @@ python scripts/create_artifacts.py \
 Set `PUBLIC_NFC_BASE_URL` in `.env` or pass `--base-url` to control the URL prefix. Example output URL:
 
 ```text
-https://skullmod.app/nfc/<public_token>
+https://skullmod.tr/nfc/<public_token>
 ```
 
 The NFC tag stores only the artifact URL. Ownership is created later when a user claims the artifact through the app/backend.
