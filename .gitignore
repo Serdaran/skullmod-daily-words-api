@@ -6,6 +6,9 @@ __pycache__/
 # SQLite veritabanı
 skullmod.db
 
+# Generated production/export CSV files
+exports/
+
 # macOS sistem dosyaları
 .DS_Store
 
@@ -14,4 +17,3 @@ skullmod.db
 
 # Swiss Ephemeris data (deployment'ta ayrıca eklenir)
 app/data/swisseph/
-
