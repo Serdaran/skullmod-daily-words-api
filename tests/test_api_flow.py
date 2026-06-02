@@ -6,7 +6,7 @@ from sqlmodel.pool import StaticPool
 
 from app.deps import get_db
 from app.main import app
-from app.models import DailyCombination, DailyWord, NFCScanLog, PhysicalSkull
+from app.models import DailyCombination, DailyWord, NFCScanLog, PhysicalSkull, User
 
 
 def make_test_client():
@@ -231,6 +231,59 @@ def test_profile_password_reset_rejects_wrong_birth_place():
         app.dependency_overrides.clear()
 
     assert reset_response.status_code == 400
+
+
+def test_delete_my_account_removes_user_data_and_unclaims_artifact():
+    client, engine = make_test_client()
+
+    try:
+        token = register_test_user(client)
+        artifact = create_test_artifact(engine)
+
+        client.post(
+            f"/api/v1/nfc/{artifact.public_token}/claim",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        client.get("/api/v1/daily-words", headers={"Authorization": f"Bearer {token}"})
+        client.post(
+            "/api/v1/daily-combination",
+            json={
+                "date": date.today().isoformat(),
+                "word1": "Düşünce",
+                "word2": "İlham",
+                "skull_id": "skull-042",
+                "language": "tr",
+            },
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+        delete_response = client.delete(
+            "/api/v1/me",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        daily_after_delete = client.get(
+            "/api/v1/daily-words",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+        with Session(engine) as session:
+            users = session.exec(select(User)).all()
+            daily_words = session.exec(select(DailyWord)).all()
+            combinations = session.exec(select(DailyCombination)).all()
+            refreshed_artifact = session.exec(select(PhysicalSkull)).first()
+            scan_logs = session.exec(select(NFCScanLog)).all()
+    finally:
+        app.dependency_overrides.clear()
+
+    assert delete_response.status_code == 200
+    assert delete_response.json()["success"] is True
+    assert daily_after_delete.status_code == 404
+    assert users == []
+    assert daily_words == []
+    assert combinations == []
+    assert refreshed_artifact.owner_user_id is None
+    assert refreshed_artifact.claim_status == "unclaimed"
+    assert all(log.user_id is None for log in scan_logs)
 
 
 def test_daily_words_requires_token():

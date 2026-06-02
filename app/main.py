@@ -12,7 +12,7 @@ from sqlmodel import Session, select
 
 from .config import settings
 from .db import init_db
-from .models import User, DailyCombination, PhysicalSkull, NFCScanLog
+from .models import User, DailyCombination, DailyWord, PhysicalSkull, NFCScanLog
 from .schemas import (
     AuthResponse,
     BasicResponse,
@@ -389,6 +389,48 @@ def reset_password_with_profile(
     return BasicResponse(
         success=True,
         message="Şifre güncellendi.",
+    )
+
+
+@app.delete("/api/v1/me", response_model=BasicResponse)
+def delete_my_account(
+    current_user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+):
+    user = db.exec(select(User).where(User.user_id == current_user_id)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    for daily_word in db.exec(
+        select(DailyWord).where(DailyWord.user_id == current_user_id)
+    ).all():
+        db.delete(daily_word)
+
+    for combination in db.exec(
+        select(DailyCombination).where(DailyCombination.user_id == current_user_id)
+    ).all():
+        db.delete(combination)
+
+    for artifact in db.exec(
+        select(PhysicalSkull).where(PhysicalSkull.owner_user_id == current_user_id)
+    ).all():
+        artifact.owner_user_id = None
+        artifact.claim_status = "unclaimed"
+        artifact.claimed_at = None
+        db.add(artifact)
+
+    for scan_log in db.exec(
+        select(NFCScanLog).where(NFCScanLog.user_id == current_user_id)
+    ).all():
+        scan_log.user_id = None
+        db.add(scan_log)
+
+    db.delete(user)
+    db.commit()
+
+    return BasicResponse(
+        success=True,
+        message="Hesap ve ilişkili kişisel veriler silindi.",
     )
 
 
