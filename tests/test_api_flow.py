@@ -1,4 +1,5 @@
-from datetime import date
+import json
+from datetime import date, datetime, timedelta
 
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine, select
@@ -7,6 +8,7 @@ from sqlmodel.pool import StaticPool
 from app.deps import get_db
 from app.main import app
 from app.models import DailyCombination, DailyWord, NFCScanLog, PhysicalSkull, User
+from app.services.words_engine import get_or_create_daily_words, pick_word1
 
 
 def make_test_client():
@@ -420,6 +422,55 @@ def test_daily_words_cache_creates_one_record_per_user_per_day():
     assert second_response.status_code == 200
     assert first_response.json()["data"] == second_response.json()["data"]
     assert len(records) == 1
+
+
+def test_pick_word1_skips_recent_relationship_candidate():
+    pool = ["Sakinlik", "Toplanma", "Denge", "Merkez"]
+
+    word = pick_word1("Sükunet", pool, {"Sakinlik"})
+
+    assert word == "Toplanma"
+
+
+def test_daily_words_avoids_recent_cornerstone_when_available(monkeypatch):
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    SQLModel.metadata.create_all(engine)
+    current_day = date(2026, 6, 3)
+    user = User(
+        user_id="recent-word-user",
+        first_name="DENIZ",
+        last_name="KAYA",
+        birth_date=datetime(1990, 8, 17, 14, 30),
+        birth_place="Izmir, Turkiye",
+        cornerstone_pool=json.dumps(["Sakinlik", "Toplanma", "Denge", "Merkez"]),
+    )
+
+    monkeypatch.setattr(
+        "app.services.words_engine.pick_word2",
+        lambda *args, **kwargs: "Sükunet",
+    )
+
+    with Session(engine) as session:
+        session.add(user)
+        session.add(
+            DailyWord(
+                user_id=user.user_id,
+                date=current_day - timedelta(days=1),
+                word1="Sakinlik",
+                word2="Sükunet",
+                motto="Eski motto",
+            )
+        )
+        session.commit()
+
+        word1, word2, _ = get_or_create_daily_words(session, user, current_day)
+
+    assert word2 == "Sükunet"
+    assert word1 == "Toplanma"
 
 
 def test_daily_combination_records_distinct_user_match_count():

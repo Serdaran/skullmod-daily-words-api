@@ -1,7 +1,8 @@
 import json
-from datetime import date, datetime
+import hashlib
+from datetime import date, datetime, timedelta
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import List, Set, Tuple
 
 from sqlmodel import Session, select
 
@@ -11,12 +12,22 @@ from .numerology import core_numbers, daily_energy_word as numerology_daily
 from .chinese import zodiac_for_year, element_for_year
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+RECENT_WORD1_LOOKBACK_DAYS = 14
 
 
 def load_json(name: str) -> dict:
     """app/data içinden JSON dosyası yükler."""
     with open(DATA_DIR / name, "r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def stable_index(seed: str, length: int) -> int:
+    """
+    Python's built-in hash() changes between processes. Daily word selection
+    needs a stable index so the same inputs do not drift after a deploy/restart.
+    """
+    digest = hashlib.sha256(seed.encode("utf-8")).hexdigest()
+    return int(digest[:12], 16) % length
 
 
 def ensure_cornerstone_pool(u: User) -> List[str]:
@@ -97,15 +108,24 @@ def pick_word2(current_date: datetime, first_name: str, last_name: str, birth_da
     return astro_word if (current_date.toordinal() % 2 == 0) else num_word
 
 
-def pick_word1(word2: str, cornerstone_pool: List[str]) -> str:
+def pick_word1(
+    word2: str,
+    cornerstone_pool: List[str],
+    excluded_words: Set[str] | None = None,
+) -> str:
     """
     Köşe taşı kelimesi (word1):
     - relationship_map.json içinden word2 → [ilişkili kelimeler] al
     - Kullanıcının cornerstone_pool'unda olan ilk kelimeyi seç
     - Hiçbiri yoksa havuzdan deterministik rastgele bir kelime seç
     """
+    excluded_words = excluded_words or set()
     rel = load_json("relationship_map.json")
     candidates = rel.get(word2, [])
+    for w in candidates:
+        if w in cornerstone_pool and w not in excluded_words:
+            return w
+
     for w in candidates:
         if w in cornerstone_pool:
             return w
@@ -113,7 +133,12 @@ def pick_word1(word2: str, cornerstone_pool: List[str]) -> str:
     if not cornerstone_pool:
         return "Odak"
 
-    idx = (hash(word2) % len(cornerstone_pool))
+    available_pool = [w for w in cornerstone_pool if w not in excluded_words]
+    if available_pool:
+        idx = stable_index(word2, len(available_pool))
+        return available_pool[idx]
+
+    idx = stable_index(word2, len(cornerstone_pool))
     return cornerstone_pool[idx]
 
 
@@ -147,6 +172,15 @@ def get_or_create_daily_words(session: Session, user: User, current_day: date) -
 
     # Köşe taşı havuzu
     cs_pool = ensure_cornerstone_pool(user)
+    recent_start = current_day - timedelta(days=RECENT_WORD1_LOOKBACK_DAYS)
+    recent_word1_records = session.exec(
+        select(DailyWord.word1).where(
+            DailyWord.user_id == user.user_id,
+            DailyWord.date >= recent_start,
+            DailyWord.date < current_day,
+        )
+    ).all()
+    recent_word1 = set(recent_word1_records)
 
     # Günlük enerji kelimesi (word2)
     current_dt = datetime.combine(current_day, datetime.min.time())
@@ -159,7 +193,7 @@ def get_or_create_daily_words(session: Session, user: User, current_day: date) -
     )
 
     # Köşe taşı kelimesi (word1)
-    word1 = pick_word1(word2, cs_pool)
+    word1 = pick_word1(word2, cs_pool, recent_word1)
 
     # Motto
     motto = build_motto(word1, word2)
@@ -177,4 +211,3 @@ def get_or_create_daily_words(session: Session, user: User, current_day: date) -
     session.refresh(rec)
 
     return rec.word1, rec.word2, rec.motto
-

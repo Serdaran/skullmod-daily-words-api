@@ -154,14 +154,14 @@ ENERGY_WORDS_BY_ELEMENT = {
     ],
     "earth": [
         "Toplanma", "Köklenme", "Sabır", "İstikrar", "Dayanıklılık",
-        "Planlama", "Somutlaşma", "Denge", "Emek", "Temel",
+        "Planlama", "Somutlaşma", "Toparlanma", "Emek", "Temel",
         "Güven", "Rutin", "Beden", "Bereket", "Sınır",
         "İnşa", "Yavaş Güç", "Olgunlaşma", "Taşıma", "Zemin",
         "Pratiklik", "Sadelik", "Değer", "Düzen", "Kalıcılık",
         "Topraklanma", "Dayanak", "Hedef", "Sessiz Sabır", "Ölçü",
         "Kök Hafızası", "İç Disiplin", "Somut Adım", "Ritim",
         "Yapı Kurma", "Güvenli Alan", "Sabitleme", "Derlenme",
-        "Konsantrasyon", "Taş Gibi Netlik",
+        "Konsantrasyon", "Taş Gibi Netlik", "Duruş", "Denge",
     ],
     "air": [
         "İlham", "Merak", "Fikir", "İletişim", "Bağlantı",

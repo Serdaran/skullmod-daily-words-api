@@ -14,7 +14,7 @@
 
   "Ağaç": ["Büyüme", "Esneklik", "Canlanma", "Kök", "Filiz", "Yön Bulma", "Genişleme", "Tazelenme"],
   "Ateş": ["Tutku", "Enerji", "Dönüşüm", "Parlama", "Kıvılcım", "Isı", "Cesaret", "Canlanma"],
-  "Toprak": ["Stabilite", "Pratiklik", "Köklülük", "Taşıma", "Bereket", "Denge", "Dayanak", "Somutluk"],
+  "Toprak": ["Stabilite", "Pratiklik", "Köklülük", "Taşıma", "Bereket", "Dayanak", "Somutluk", "Toparlanma", "Duruş", "Denge"],
   "Metal": ["Keskinlik", "Düzen", "Netlik", "Sınır", "Karar", "Arıtma", "Disiplin", "Odak"],
   "Su": ["Akış", "Sezgi", "Derinlik", "Uyumlanma", "Sakinlik", "Rüya", "Arınma", "Hafıza"]
 }
