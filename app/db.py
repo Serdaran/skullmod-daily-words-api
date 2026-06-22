@@ -70,19 +70,18 @@ def ensure_user_account_columns():
             "updated_at": "TIMESTAMP WITH TIME ZONE",
         }
 
-        with engine.begin() as connection:
-            for column_name, column_type in postgres_columns.items():
-                connection.execute(
-                    text(
-                        f'ALTER TABLE "user" ADD COLUMN IF NOT EXISTS {column_name} {column_type}'
+        for column_name, column_type in postgres_columns.items():
+            try:
+                with engine.begin() as connection:
+                    connection.execute(
+                        text(
+                            f'ALTER TABLE "user" ADD COLUMN IF NOT EXISTS {column_name} {column_type}'
+                        )
                     )
-                )
-            connection.execute(
-                text(
-                    'CREATE UNIQUE INDEX IF NOT EXISTS ix_user_email_unique '
-                    'ON "user" (email) WHERE email IS NOT NULL'
-                )
-            )
+            except Exception as exc:
+                print(f"Postgres user column migration skipped for {column_name}: {exc}")
+
+        return
 
 def get_session():
     with Session(engine) as session:
