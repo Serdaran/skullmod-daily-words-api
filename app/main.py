@@ -7,7 +7,7 @@ from typing import Optional
 
 from fastapi import FastAPI, Depends, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import update
+from sqlalchemy import text, update
 from sqlmodel import Session, select
 
 from .config import settings
@@ -69,6 +69,38 @@ app.add_middleware(
 @app.get("/")
 def root():
     return {"status": "ok", "app": "SkullMod Daily Words API"}
+
+
+@app.get("/api/v1/admin/db-health")
+def admin_db_health(
+    x_admin_key: Optional[str] = Header(default=None),
+    db: Session = Depends(get_db),
+):
+    if x_admin_key != settings.SECRET_KEY:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    try:
+        user_columns = db.exec(
+            text(
+                "select column_name from information_schema.columns "
+                "where table_name = 'user' order by ordinal_position"
+            )
+        ).all()
+        physical_skull_count = db.exec(
+            text("select count(*) from physicalskull")
+        ).one()[0]
+
+        return {
+            "ok": True,
+            "user_columns": [row[0] for row in user_columns],
+            "physical_skull_count": physical_skull_count,
+        }
+    except Exception as exc:
+        return {
+            "ok": False,
+            "error_type": type(exc).__name__,
+            "error": str(exc)[:500],
+        }
 
 
 def get_optional_user_id(
