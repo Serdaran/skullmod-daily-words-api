@@ -40,14 +40,6 @@ def init_db():
 
 
 def ensure_user_account_columns():
-    if "sqlite" not in DATABASE_URL:
-        return
-
-    inspector = inspect(engine)
-    if not inspector.has_table("user"):
-        return
-
-    existing_columns = {column["name"] for column in inspector.get_columns("user")}
     account_columns = {
         "email": "VARCHAR",
         "password_hash": "VARCHAR",
@@ -55,12 +47,42 @@ def ensure_user_account_columns():
         "updated_at": "DATETIME",
     }
 
-    with engine.begin() as connection:
-        for column_name, column_type in account_columns.items():
-            if column_name not in existing_columns:
+    if "sqlite" in DATABASE_URL:
+        inspector = inspect(engine)
+        if not inspector.has_table("user"):
+            return
+
+        existing_columns = {column["name"] for column in inspector.get_columns("user")}
+
+        with engine.begin() as connection:
+            for column_name, column_type in account_columns.items():
+                if column_name not in existing_columns:
+                    connection.execute(
+                        text(f"ALTER TABLE user ADD COLUMN {column_name} {column_type}")
+                    )
+        return
+
+    if "postgresql+psycopg" in DATABASE_URL:
+        postgres_columns = {
+            "email": "VARCHAR",
+            "password_hash": "VARCHAR",
+            "created_at": "TIMESTAMP WITH TIME ZONE",
+            "updated_at": "TIMESTAMP WITH TIME ZONE",
+        }
+
+        with engine.begin() as connection:
+            for column_name, column_type in postgres_columns.items():
                 connection.execute(
-                    text(f"ALTER TABLE user ADD COLUMN {column_name} {column_type}")
+                    text(
+                        f'ALTER TABLE "user" ADD COLUMN IF NOT EXISTS {column_name} {column_type}'
+                    )
                 )
+            connection.execute(
+                text(
+                    'CREATE UNIQUE INDEX IF NOT EXISTS ix_user_email_unique '
+                    'ON "user" (email) WHERE email IS NOT NULL'
+                )
+            )
 
 def get_session():
     with Session(engine) as session:
