@@ -335,6 +335,57 @@ def test_register_then_daily_words_returns_expected_contract():
     assert body["data"]["motto"]
 
 
+def test_daily_history_restores_streak_from_server_records():
+    client, engine = make_test_client()
+
+    try:
+        register_response = client.post(
+            "/api/v1/register",
+            json={
+                "first_name": "DENIZ",
+                "last_name": "KAYA",
+                "birth_date": "1990-08-17T14:30:00",
+                "birth_place": "Izmir, Turkiye",
+            },
+        )
+        token = register_response.json()["token"]
+        user_id = register_response.json()["user_id"]
+
+        with Session(engine) as session:
+            for day in [
+                date(2026, 6, 20),
+                date(2026, 6, 19),
+                date(2026, 6, 18),
+                date(2026, 6, 16),
+                date(2026, 6, 10),
+            ]:
+                session.add(
+                    DailyWord(
+                        user_id=user_id,
+                        date=day,
+                        word1="Sakinlik",
+                        word2="Sükunet",
+                        motto="Eski motto",
+                    )
+                )
+            session.commit()
+
+        history_response = client.get(
+            "/api/v1/me/daily-history?lang=tr",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    body = history_response.json()
+
+    assert history_response.status_code == 200
+    assert body["success"] is True
+    assert body["data"]["streak_count"] == 4
+    assert body["data"]["last_date"] == "2026-06-20"
+    assert len(body["data"]["entries"]) == 5
+
+
 def test_daily_words_supports_english_language():
     client, _ = make_test_client()
 

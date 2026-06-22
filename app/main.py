@@ -523,6 +523,82 @@ def daily_words(
     )
 
 
+def calculate_streak_from_dates(
+    dates: list[date],
+    max_gap_days: int = 3,
+) -> int:
+    unique_dates = sorted(set(dates), reverse=True)
+    if not unique_dates:
+        return 0
+
+    streak = 1
+    previous_date = unique_dates[0]
+
+    for current_date in unique_dates[1:]:
+        gap_days = (previous_date - current_date).days
+        if 1 <= gap_days <= max_gap_days:
+            streak += 1
+            previous_date = current_date
+            continue
+        break
+
+    return streak
+
+
+@app.get("/api/v1/me/daily-history")
+def my_daily_history(
+    lang: str = "tr",
+    limit: int = 90,
+    current_user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+):
+    user = db.exec(select(User).where(User.user_id == current_user_id)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    language = normalize_language(lang)
+    safe_limit = max(1, min(limit, 90))
+    records = db.exec(
+        select(DailyWord)
+        .where(DailyWord.user_id == current_user_id)
+        .order_by(DailyWord.date.desc())
+        .limit(safe_limit)
+    ).all()
+
+    entries = []
+    for record in records:
+        energy_word, element_key = pick_personal_daily_energy_word(user, record.date)
+        localized_cornerstone = localize_word(record.word1, language)
+        localized_energy = localize_word(energy_word, language)
+        motto = build_localized_motto(
+            localized_cornerstone,
+            localized_energy,
+            element_key,
+            language,
+        )
+
+        entries.append(
+            {
+                "date": record.date.isoformat(),
+                "word1": localized_cornerstone,
+                "word2": localized_energy,
+                "motto": motto,
+                "language": language,
+            }
+        )
+
+    return {
+        "success": True,
+        "data": {
+            "streak_count": calculate_streak_from_dates(
+                [record.date for record in records]
+            ),
+            "last_date": records[0].date.isoformat() if records else None,
+            "entries": entries,
+        },
+    }
+
+
 @app.post("/api/v1/daily-combination", response_model=DailyCombinationResponse)
 def record_daily_combination(
     payload: DailyCombinationRequest,
