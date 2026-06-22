@@ -13,11 +13,15 @@ def normalize_database_url(database_url: str) -> str:
 
 DATABASE_URL = normalize_database_url(settings.DATABASE_URL)
 
+connect_args = {"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
+if "postgresql+psycopg" in DATABASE_URL:
+    connect_args["connect_timeout"] = 10
 
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {},
+    connect_args=connect_args,
     pool_pre_ping=True,
+    pool_timeout=10,
 )
 
 def init_db():
@@ -28,8 +32,11 @@ def init_db():
         PhysicalSkull,
         User,
     )
-    SQLModel.metadata.create_all(engine)
-    ensure_user_account_columns()
+    try:
+        SQLModel.metadata.create_all(engine)
+        ensure_user_account_columns()
+    except Exception as exc:
+        print(f"DB init skipped after startup connection error: {exc}")
 
 
 def ensure_user_account_columns():
